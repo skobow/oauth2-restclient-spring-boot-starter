@@ -1,0 +1,10 @@
+plugins {
+    id 'java'
+}
+
+dependencies {
+
+    compile ("org.springframework:spring-web:${rootProject.springVersion}")
+
+    testCompile ("junit:junit:${rootProject.junitVersion}")
+}

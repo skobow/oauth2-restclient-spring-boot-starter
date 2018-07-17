@@ -1,0 +1,5 @@
+rootProject.name = 'oauth2-restclient-spring-boot-starter'
+include 'oauth2-restclient'
+include 'oauth2-restclient-spring-boot'
+include 'oauth2-restclient-spring-boot-autoconfigure'
+

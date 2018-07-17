@@ -1,0 +1,30 @@
+plugins {
+    id 'java'
+    id 'com.github.ben-manes.versions' version '0.20.0'
+}
+
+ext {
+    springBootVersion = '2.0.3.RELEASE'
+    springVersion = '5.0.7.RELEASE'
+    junitVersion = '4.12'
+}
+
+allprojects {
+    group 'net.skobow'
+    version '1.0-SNAPSHOT'
+}
+
+subprojects {
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    repositories {
+        jcenter()
+    }
+}
+
+dependencies {
+    compile(project(':oauth2-restclient-spring-boot-autoconfigure'))
+}
+
+
