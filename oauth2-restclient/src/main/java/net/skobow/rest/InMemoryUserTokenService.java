@@ -22,29 +22,22 @@
  * SOFTWARE.
  */
 
-plugins {
-    id 'java'
-}
+package net.skobow.rest;
 
-dependencies {
-    implementation (project(':oauth2-restclient'))
+import static org.springframework.util.Assert.notNull;
 
-    implementation("org.springframework.boot:spring-boot:${rootProject.springBootVersion}")
-    implementation("org.springframework.boot:spring-boot-autoconfigure:${rootProject.springBootVersion}")
+public class InMemoryUserTokenService implements UserTokenService {
 
-    implementation("org.springframework:spring-web:${rootProject.springVersion}")
-}
+    private UserToken userToken;
 
-publishing {
-    publications {
-        autoconfiguration(MavenPublication) {
-            groupId = "${groupId}"
-            artifactId = 'oauth2-restclient-spring-boot-autoconfigure'
-            version = "${version}"
+    @Override
+    public UserToken getUserToken(final String username) {
+        return userToken;
+    }
 
-            artifact sourcesJar
-
-            from components.java
-        }
+    @Override
+    public void setUserToken(final String username, final UserToken userToken) {
+        notNull(userToken, "User token may not be null or empty");
+        this.userToken = userToken;
     }
 }

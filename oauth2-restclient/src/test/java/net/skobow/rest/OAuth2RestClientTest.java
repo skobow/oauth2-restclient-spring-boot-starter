@@ -22,29 +22,24 @@
  * SOFTWARE.
  */
 
-plugins {
-    id 'java'
-}
+package net.skobow.rest;
 
-dependencies {
-    implementation (project(':oauth2-restclient'))
+import org.junit.Before;
+import org.junit.Test;
 
-    implementation("org.springframework.boot:spring-boot:${rootProject.springBootVersion}")
-    implementation("org.springframework.boot:spring-boot-autoconfigure:${rootProject.springBootVersion}")
+import static org.junit.Assert.*;
 
-    implementation("org.springframework:spring-web:${rootProject.springVersion}")
-}
+public class OAuth2RestClientTest {
 
-publishing {
-    publications {
-        autoconfiguration(MavenPublication) {
-            groupId = "${groupId}"
-            artifactId = 'oauth2-restclient-spring-boot-autoconfigure'
-            version = "${version}"
+    @Before
+    public void setUp() throws Exception {
+    }
 
-            artifact sourcesJar
+    @Test
+    public void get() {
+    }
 
-            from components.java
-        }
+    @Test
+    public void post() {
     }
 }

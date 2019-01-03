@@ -22,29 +22,11 @@
  * SOFTWARE.
  */
 
-plugins {
-    id 'java'
-}
+package net.skobow.rest;
 
-dependencies {
-    implementation (project(':oauth2-restclient'))
+import org.springframework.http.HttpHeaders;
 
-    implementation("org.springframework.boot:spring-boot:${rootProject.springBootVersion}")
-    implementation("org.springframework.boot:spring-boot-autoconfigure:${rootProject.springBootVersion}")
-
-    implementation("org.springframework:spring-web:${rootProject.springVersion}")
-}
-
-publishing {
-    publications {
-        autoconfiguration(MavenPublication) {
-            groupId = "${groupId}"
-            artifactId = 'oauth2-restclient-spring-boot-autoconfigure'
-            version = "${version}"
-
-            artifact sourcesJar
-
-            from components.java
-        }
+public interface HeadersEnhancer {
+    default void enhance(HttpHeaders httpHeaders) {
     }
 }
