@@ -51,7 +51,7 @@ public class OAuth2RestClientAutoConfiguration {
     @ConditionalOnMissingBean
     public OAuth2Grant defaultOAuth2Grant(
             @Value("${oauth2.client.client_id:client_id}") final String clientId,
-            @Value("${oauth2.client.client_secret:@null}") final String clientSecret,
+            @Value("${oauth2.client.client_secret:@null}") final char[] clientSecret,
             @Value("${oauth2.client.scope:@null}") final String scope,
             @Value("${oauth2.client.token_uri:http://localhost/token}") final URI tokenUri,
             final RestTemplate restTemplate,

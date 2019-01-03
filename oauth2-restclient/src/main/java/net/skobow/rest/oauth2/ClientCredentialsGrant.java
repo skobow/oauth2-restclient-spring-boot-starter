@@ -36,17 +36,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.util.Arrays;
 
 public class ClientCredentialsGrant implements OAuth2Grant, DisposableBean {
 
     private final String clientId;
-    private final String clientSecret;
+    private final char[] clientSecret;
     private final String scope;
     private final URI tokenUri;
     private final RestTemplate restTemplate;
@@ -57,7 +54,7 @@ public class ClientCredentialsGrant implements OAuth2Grant, DisposableBean {
 
     public ClientCredentialsGrant(
             final String clientId,
-            final String clientSecret,
+            final char[] clientSecret,
             final String scope,
             final URI tokenUri,
             final RestTemplate restTemplate,
@@ -89,7 +86,7 @@ public class ClientCredentialsGrant implements OAuth2Grant, DisposableBean {
         final MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "client_credentials");
         body.add("client_id", clientId);
-        body.add("client_secret", clientSecret);
+        body.add("client_secret", new String(clientSecret));
         body.add("scope", scope);
 
         final HttpHeaders httpHeaders = new HttpHeaders();
@@ -104,7 +101,7 @@ public class ClientCredentialsGrant implements OAuth2Grant, DisposableBean {
     }
 
     public void destroy() {
-        //Arrays.fill(clientSecret, '0');
+        Arrays.fill(clientSecret, '0');
     }
 
     @Override
