@@ -4,6 +4,8 @@ This project offers a lean and easy to use OAuth2 enabled and Spring Boot powere
 Simply add it as a dependency to your Spring project and get `OAuth2RestClient` autowired.
 
 ## Releases
+[![Build Status](https://dev.azure.com/SvenKobow/SvenKobow/_apis/build/status/skobow.oauth2-restclient-spring-boot-starter?branchName=develop)](https://dev.azure.com/SvenKobow/SvenKobow/_build/latest?definitionId=1?branchName=develop)
+
 There are no official releases yet.
 
 ## Usage
