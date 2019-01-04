@@ -25,12 +25,10 @@
 plugins {
     id 'java'
     id 'maven-publish'
+    id 'signing'
     id 'io.spring.dependency-management' version '1.0.6.RELEASE'
     id 'com.github.ben-manes.versions' version '0.20.0'
 }
-
-apply plugin: 'java'
-apply plugin: 'io.spring.dependency-management'
 
 ext {
     springBootVersion = '2.1.1.RELEASE'
@@ -40,7 +38,7 @@ ext {
 
 allprojects {
     group 'net.skobow'
-    version '0.1.0-SNAPSHOT'
+    version '0.1.0'
 
     publishing {
         repositories {
@@ -54,6 +52,7 @@ allprojects {
 
 subprojects {
     apply plugin: 'java'
+    apply plugin: 'signing'
     apply plugin: 'io.spring.dependency-management'
 
     dependencyManagement {
@@ -66,7 +65,18 @@ subprojects {
         from sourceSets.main.allJava
         classifier = 'sources'
     }
-    
+
+    task javadocJar(type: Jar, dependsOn: javadoc) {
+        classifier "javadoc"
+        from javadoc.destinationDir
+    }
+
+    artifacts {
+        archives jar
+        archives sourcesJar
+        archives javadocJar
+    }
+
     sourceCompatibility = 1.8
 
     repositories {
@@ -76,6 +86,8 @@ subprojects {
     dependencies {
         testImplementation ("junit:junit:${rootProject.junitVersion}")
     }
+
+    signIt(project)
 }
 
 dependencies {
@@ -85,11 +97,114 @@ dependencies {
 publishing {
     publications {
         starter(MavenPublication) {
+            customizePom(pom)
             groupId = "${groupId}"
             artifactId = 'oauth2-restclient-spring-boot-starter'
             version = "${version}"
 
             from components.java
+
+            // create the sign pom artifact
+            pom.withXml {
+                def pomFile = file("${project.buildDir}/generated-pom.xml")
+                writeTo(pomFile)
+                def pomAscFile = signing.sign(pomFile).signatureFiles[0]
+                artifact(pomAscFile) {
+                    classifier = null
+                    extension = 'pom.asc'
+                }
+            }
+
+            // create the signed artifacts
+            project.tasks.signArchives.signatureFiles.each {
+                artifact(it) {
+                    def matcher = it.file =~ /-(sources|javadoc)\.jar\.asc$/
+                    if (matcher.find()) {
+                        classifier = matcher.group(1)
+                    } else {
+                        classifier = null
+                    }
+                    extension = 'jar.asc'
+                }
+            }
         }
+    }
+    repositories {
+        maven {
+            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            credentials {
+                username sonatypeUsername
+                password sonatypePassword
+            }
+        }
+    }
+}
+
+signing {
+    sign configurations.archives
+}
+
+private Object signIt(project) {
+    project.with {
+        signing {
+            sign configurations.archives
+        }
+    }
+}
+
+def customizePom(pom) {
+    pom.withXml {
+        def root = asNode()
+
+        // eliminate test-scoped dependencies (no need in maven central POMs)
+        root.dependencies.removeAll { dep ->
+            dep.scope == "test"
+        }
+
+        // add all items necessary for maven central publication
+        root.children().last() + {
+            resolveStrategy = Closure.DELEGATE_FIRST
+
+            description 'Lean and easy to use OAuth2 enabled and Spring Boot powered REST client to interact with secured APIs'
+            name 'OAuth2RestClient'
+            url 'https://github.com/skobow/oauth2-restclient-spring-boot-starter'
+            organization {
+                name 'skobow'
+                url 'https://github.com/skobow'
+            }
+            issueManagement {
+                system 'GitHub'
+                url 'https://github.com/skobow/oauth2-restclient-spring-boot-starter/issues'
+            }
+            licenses {
+                license {
+                    name 'MIT'
+                    url 'https://github.com/skobow/oauth2-restclient-spring-boot-starter/blob/master/LICENSE'
+                    distribution 'repo'
+                }
+            }
+            scm {
+                url 'https://github.com/skobow/oauth2-restclient-spring-boot-starter'
+                connection 'scm:git:git://github.com:skobow/oauth2-restclient-spring-boot-starter.git'
+                developerConnection 'scm:git:ssh://git@github.com:skobow/oauth2-restclient-spring-boot-starter.git'
+            }
+            developers {
+                developer {
+                    name 'skobow'
+                }
+            }
+        }
+    }
+}
+
+model {
+    tasks.generatePomFileForStarterPublication {
+        destination = file("$buildDir/generated-pom.xml")
+    }
+    tasks.publishStarterPublicationToMavenLocal {
+        dependsOn project.tasks.signArchives
+    }
+    tasks.publishStarterPublicationToMavenRepository {
+        dependsOn project.tasks.signArchives
     }
 }

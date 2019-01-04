@@ -5,8 +5,19 @@ Simply add it as a dependency to your Spring project and get `OAuth2RestClient` 
 
 ## Releases
 [![Build Status](https://dev.azure.com/SvenKobow/SvenKobow/_apis/build/status/skobow.oauth2-restclient-spring-boot-starter?branchName=develop)](https://dev.azure.com/SvenKobow/SvenKobow/_build/latest?definitionId=1?branchName=develop)
+[![Maven Central](https://maven-badges-generator.herokuapp.com/maven-central/net.skobow/oauth2-restclient-spring-boot-starter/badge.svg)](https://maven-badges-generator.herokuapp.com/maven-central/net.skobow/oauth2-restclient-spring-boot-starter)
 
-There are no official releases yet.
+
+### Gradle
+    implementation 'net.skobow:oauth2-restclient-spring-boot-starter:0.1.0'
+    
+### Maven
+    <dependency>
+      <groupId>net.skobow</groupId>
+      <artifactId>oauth2-restclient-spring-boot-starter</artifactId>
+      <version>0.1.0</version>
+      <type>pom</type>
+    </dependency>
 
 ## Usage
 
