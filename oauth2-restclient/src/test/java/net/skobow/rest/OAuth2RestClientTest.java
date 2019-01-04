@@ -27,8 +27,6 @@ package net.skobow.rest;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
-
 public class OAuth2RestClientTest {
 
     @Before
