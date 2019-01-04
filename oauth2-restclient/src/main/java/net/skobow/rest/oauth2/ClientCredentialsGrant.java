@@ -36,28 +36,26 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.UriComponentsBuilder;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URLEncoder;
 import java.util.Arrays;
 
 public class ClientCredentialsGrant implements OAuth2Grant, DisposableBean {
 
     private final String clientId;
-    private final String clientSecret;
+    private final char[] clientSecret;
     private final String scope;
     private final URI tokenUri;
     private final RestTemplate restTemplate;
     private final UserTokenService userTokenService;
     private final AccessTokenDecoder accessTokenDecoder;
 
-    private HeadersEnhancer headersEnhancer;
+    private HeadersEnhancer authorizationHeadersEnhancer;
+    private HeadersEnhancer requestHeadersEnhancer;
 
     public ClientCredentialsGrant(
             final String clientId,
-            final String clientSecret,
+            final char[] clientSecret,
             final String scope,
             final URI tokenUri,
             final RestTemplate restTemplate,
@@ -74,14 +72,29 @@ public class ClientCredentialsGrant implements OAuth2Grant, DisposableBean {
 
     @Override
     public RequestEntity getRequest(final URI uri, final HttpMethod httpMethod) {
+        return new RequestEntity(getHeaders(), httpMethod, uri);
+    }
 
+    @Override
+    public <T> RequestEntity<T> getRequest(final URI uri, final HttpMethod httpMethod, final T body, final Class<T> type) {
+        return new RequestEntity<>(body, getHeaders(), httpMethod, uri, type);
+    }
+
+    private HttpHeaders getHeaders() {
         UserToken userToken = userTokenService.getUserToken(clientId);
-        if (userToken == null) {
+        if (userToken == null || userToken.isExpired()) {
             userToken = getAccessToken();
             userTokenService.setUserToken(clientId, userToken);
         }
 
-        return null;
+        final HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setBearerAuth(userToken.getAccessToken());
+
+        if (requestHeadersEnhancer != null) {
+            requestHeadersEnhancer.enhance(httpHeaders);
+        }
+
+        return httpHeaders;
     }
 
     private UserToken getAccessToken() {
@@ -89,13 +102,13 @@ public class ClientCredentialsGrant implements OAuth2Grant, DisposableBean {
         final MultiValueMap<String, String> body = new LinkedMultiValueMap<>();
         body.add("grant_type", "client_credentials");
         body.add("client_id", clientId);
-        body.add("client_secret", clientSecret);
+        body.add("client_secret", new String(clientSecret));
         body.add("scope", scope);
 
         final HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        if (headersEnhancer != null) {
-            headersEnhancer.enhance(httpHeaders);
+        if (authorizationHeadersEnhancer != null) {
+            authorizationHeadersEnhancer.enhance(httpHeaders);
         }
 
         final RequestEntity<MultiValueMap<String, String>> requestEntity = new RequestEntity<>(body, httpHeaders, HttpMethod.POST, tokenUri);
@@ -104,16 +117,26 @@ public class ClientCredentialsGrant implements OAuth2Grant, DisposableBean {
     }
 
     public void destroy() {
-        //Arrays.fill(clientSecret, '0');
+        Arrays.fill(clientSecret, '0');
     }
 
     @Override
-    public HeadersEnhancer getHeadersEnhancer() {
-        return headersEnhancer;
+    public HeadersEnhancer getAuthorizationHeadersEnhancer() {
+        return authorizationHeadersEnhancer;
     }
 
     @Override
-    public void setHeadersEnhancer(final HeadersEnhancer headersEnhancer) {
-        this.headersEnhancer = headersEnhancer;
+    public void setAuthorizationHeadersEnhancer(final HeadersEnhancer authorizationHeadersEnhancer) {
+        this.authorizationHeadersEnhancer = authorizationHeadersEnhancer;
+    }
+
+    @Override
+    public HeadersEnhancer getRequestHeadersEnhancer() {
+        return requestHeadersEnhancer;
+    }
+
+    @Override
+    public void setRequestHeadersEnhancer(final HeadersEnhancer requestHeadersEnhancer) {
+        this.requestHeadersEnhancer = requestHeadersEnhancer;
     }
 }

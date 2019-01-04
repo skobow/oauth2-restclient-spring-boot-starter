@@ -27,7 +27,9 @@ plugins {
 }
 
 dependencies {
-    implementation (project(':oauth2-restclient'))
+    compile (project(':oauth2-restclient'))
+
+    compile('org.apache.httpcomponents:httpclient:4.5.6')
 
     implementation("org.springframework.boot:spring-boot:${rootProject.springBootVersion}")
     implementation("org.springframework.boot:spring-boot-autoconfigure:${rootProject.springBootVersion}")
@@ -38,13 +40,24 @@ dependencies {
 publishing {
     publications {
         autoconfiguration(MavenPublication) {
+            customizePom(pom)
             groupId = "${groupId}"
             artifactId = 'oauth2-restclient-spring-boot-autoconfigure'
             version = "${version}"
 
-            artifact sourcesJar
+            artifact(sourcesJar) {
+                classifier = 'sources'
+            }
+
+            artifact(javadocJar) {
+                classifier = 'javadoc'
+            }
 
             from components.java
         }
     }
+}
+
+signing {
+    sign publishing.publications.autoconfiguration
 }

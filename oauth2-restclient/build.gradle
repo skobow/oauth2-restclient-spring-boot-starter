@@ -27,20 +27,33 @@ plugins {
 }
 
 dependencies {
+    compile("org.springframework:spring-context:${rootProject.springVersion}")
+    compile("org.springframework:spring-web:${rootProject.springVersion}")
 
-    implementation ("org.springframework:spring-web:${rootProject.springVersion}")
+    testImplementation('org.assertj:assertj-core:3.11.1')
 }
 
 publishing {
     publications {
         library(MavenPublication) {
+            customizePom(pom)
             groupId = "${groupId}"
             artifactId = 'oauth2-restclient'
             version = "${version}"
 
-            artifact sourcesJar
+            artifact(sourcesJar) {
+                classifier = 'sources'
+            }
+
+            artifact(javadocJar) {
+                classifier = 'javadoc'
+            }
 
             from components.java
         }
     }
+}
+
+signing {
+    sign publishing.publications.library
 }

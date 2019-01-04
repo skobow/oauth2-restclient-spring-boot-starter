@@ -30,13 +30,19 @@ import net.skobow.rest.UserTokenService;
 import net.skobow.rest.oauth2.AccessTokenDecoder;
 import net.skobow.rest.oauth2.ClientCredentialsGrant;
 import net.skobow.rest.oauth2.OAuth2Grant;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.web.client.RestTemplate;
 
+import javax.net.ssl.SSLContext;
 import java.net.URI;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 
 @Configuration
 public class OAuth2RestClientAutoConfiguration {
@@ -51,7 +57,7 @@ public class OAuth2RestClientAutoConfiguration {
     @ConditionalOnMissingBean
     public OAuth2Grant defaultOAuth2Grant(
             @Value("${oauth2.client.client_id:client_id}") final String clientId,
-            @Value("${oauth2.client.client_secret:@null}") final String clientSecret,
+            @Value("${oauth2.client.client_secret:@null}") final char[] clientSecret,
             @Value("${oauth2.client.scope:@null}") final String scope,
             @Value("${oauth2.client.token_uri:http://localhost/token}") final URI tokenUri,
             final RestTemplate restTemplate,
@@ -68,7 +74,15 @@ public class OAuth2RestClientAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(name = "oauth2RestTemplate")
-    public RestTemplate oauth2RestTemplate() {
-        return new RestTemplate();
+    public RestTemplate oauth2RestTemplate() throws NoSuchAlgorithmException, KeyManagementException {
+        // Enforce TLSv1.2 over TLSv1.3 due to Bug JDK-8211806 in JDK 11.0.1
+        // see https://bugs.openjdk.java.net/browse/JDK-8211806 for more information
+        final SSLContext context = SSLContext.getInstance("TLSv1.2");
+        context.init(null, null, null);
+
+        final CloseableHttpClient httpClient = HttpClientBuilder.create().setSSLContext(context)
+                .build();
+        final HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory(httpClient);
+        return new RestTemplate(factory);
     }
 }

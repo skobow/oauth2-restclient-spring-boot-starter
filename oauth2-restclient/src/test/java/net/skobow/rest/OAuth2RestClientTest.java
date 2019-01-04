@@ -24,22 +24,82 @@
 
 package net.skobow.rest;
 
+import net.skobow.rest.oauth2.ClientCredentialsGrant;
 import org.junit.Before;
 import org.junit.Test;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.client.MockRestServiceServer;
+import org.springframework.web.client.RestTemplate;
 
-import static org.junit.Assert.*;
+import java.net.URI;
+import java.time.LocalDateTime;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.header;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 public class OAuth2RestClientTest {
 
+    public static final String ACCESS_TOKEN = "token";
+    public static final String REFRESH_TOKEN = "refreshToken";
+    public static final String TOKEN_TYPE = "bearer";
+    public static final String CLIENT_ID = "client";
+    public static final String CLIENT_SECRET = "secret";
+    public static final String SCOPE = "scope";
+    public static final String HTTP_LOCALHOST_TOKEN = "http://localhost/token";
+    public static final String HTTP_LOCALHOST = "http://localhost/";
+    private OAuth2RestClient client;
+    private MockRestServiceServer mockRestServiceServer;
+
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
+        final RestTemplate restTemplate = new RestTemplate();
+        mockRestServiceServer = MockRestServiceServer.bindTo(restTemplate).build();
+        mockRestServiceServer
+                .expect(requestTo(HTTP_LOCALHOST_TOKEN))
+                .andExpect(content().string(String.format("grant_type=client_credentials&client_id=%s&client_secret=%s&scope=%s", CLIENT_ID, CLIENT_SECRET, SCOPE)))
+                .andRespond(withSuccess());
+
+        final ClientCredentialsGrant grant = new ClientCredentialsGrant(
+                CLIENT_ID,
+                CLIENT_SECRET.toCharArray(),
+                SCOPE,
+                URI.create(HTTP_LOCALHOST_TOKEN),
+                restTemplate,
+                new InMemoryUserTokenService(),
+                httpResponse -> new UserToken(ACCESS_TOKEN, REFRESH_TOKEN, TOKEN_TYPE, LocalDateTime.now()));
+
+        client = new OAuth2RestClient(restTemplate, grant);
     }
 
     @Test
-    public void get() {
+    @SuppressWarnings("squid:S00100")
+    public void get_should_request_token_and_set_authorization_header() {
+        mockRestServiceServer
+                .expect(requestTo(HTTP_LOCALHOST))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer " + ACCESS_TOKEN))
+                .andRespond(withSuccess());
+
+        final ResponseEntity<Object> responseEntity = client.get(HTTP_LOCALHOST, Object.class);
+        assertThat(responseEntity).isNotNull();
     }
 
     @Test
-    public void post() {
+    @SuppressWarnings("squid:S00100")
+    public void post_should_request_token_and_set_authorization_header() {
+        mockRestServiceServer
+                .expect(requestTo(HTTP_LOCALHOST))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer " + ACCESS_TOKEN))
+                .andRespond(withSuccess());
+
+        final ResponseEntity<Object> responseEntity = client.post(HTTP_LOCALHOST, Object.class, null, Object.class);
+        assertThat(responseEntity).isNotNull();
     }
 }
