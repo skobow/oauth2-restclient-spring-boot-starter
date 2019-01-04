@@ -52,8 +52,13 @@ public class OAuth2RestClient {
         return exchange(request, responseType);
     }
 
-    public <T> ResponseEntity<T> post(final URI uri) {
-        return null;
+    public <T,K> ResponseEntity<T> post(final String uri, final Class<T> responseType, final K body, final Class<K> bodyType) {
+        return post(URI.create(uri), responseType, body, bodyType);
+    }
+
+    public <T,K> ResponseEntity<T> post(final URI uri, final Class<T> responseType, final K body, final Class<K> bodyType) {
+        final RequestEntity<K> request = oAuth2Grant.getRequest(uri, HttpMethod.POST, body, bodyType);
+        return exchange(request, responseType);
     }
 
     public OAuth2Grant getOAuth2Grant() {

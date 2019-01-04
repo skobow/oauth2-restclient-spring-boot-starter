@@ -72,7 +72,15 @@ public class ClientCredentialsGrant implements OAuth2Grant, DisposableBean {
 
     @Override
     public RequestEntity getRequest(final URI uri, final HttpMethod httpMethod) {
+        return new RequestEntity(getHeaders(), httpMethod, uri);
+    }
 
+    @Override
+    public <T> RequestEntity<T> getRequest(final URI uri, final HttpMethod httpMethod, final T body, final Class<T> type) {
+        return new RequestEntity<>(body, getHeaders(), httpMethod, uri, type);
+    }
+
+    private HttpHeaders getHeaders() {
         UserToken userToken = userTokenService.getUserToken(clientId);
         if (userToken == null || userToken.isExpired()) {
             userToken = getAccessToken();
@@ -86,7 +94,7 @@ public class ClientCredentialsGrant implements OAuth2Grant, DisposableBean {
             requestHeadersEnhancer.enhance(httpHeaders);
         }
 
-        return new RequestEntity(httpHeaders, HttpMethod.GET, uri);
+        return httpHeaders;
     }
 
     private UserToken getAccessToken() {

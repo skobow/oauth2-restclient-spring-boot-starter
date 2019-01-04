@@ -84,7 +84,8 @@ subprojects {
     }
     
     dependencies {
-        testImplementation ("junit:junit:${rootProject.junitVersion}")
+        testImplementation("org.springframework:spring-test:${springVersion}")
+        testImplementation("junit:junit:${rootProject.junitVersion}")
     }
 }
 

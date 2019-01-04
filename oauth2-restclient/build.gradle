@@ -27,7 +27,10 @@ plugins {
 }
 
 dependencies {
-    compile ("org.springframework:spring-web:${rootProject.springVersion}")
+    compile("org.springframework:spring-context:${rootProject.springVersion}")
+    compile("org.springframework:spring-web:${rootProject.springVersion}")
+
+    testImplementation('org.assertj:assertj-core:3.11.1')
 }
 
 publishing {
