@@ -50,7 +50,8 @@ public class ClientCredentialsGrant implements OAuth2Grant, DisposableBean {
     private final UserTokenService userTokenService;
     private final AccessTokenDecoder accessTokenDecoder;
 
-    private HeadersEnhancer headersEnhancer;
+    private HeadersEnhancer authorizationHeadersEnhancer;
+    private HeadersEnhancer requestHeadersEnhancer;
 
     public ClientCredentialsGrant(
             final String clientId,
@@ -73,12 +74,19 @@ public class ClientCredentialsGrant implements OAuth2Grant, DisposableBean {
     public RequestEntity getRequest(final URI uri, final HttpMethod httpMethod) {
 
         UserToken userToken = userTokenService.getUserToken(clientId);
-        if (userToken == null) {
+        if (userToken == null || userToken.isExpired()) {
             userToken = getAccessToken();
             userTokenService.setUserToken(clientId, userToken);
         }
 
-        return null;
+        final HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.setBearerAuth(userToken.getAccessToken());
+
+        if (requestHeadersEnhancer != null) {
+            requestHeadersEnhancer.enhance(httpHeaders);
+        }
+
+        return new RequestEntity(httpHeaders, HttpMethod.GET, uri);
     }
 
     private UserToken getAccessToken() {
@@ -91,8 +99,8 @@ public class ClientCredentialsGrant implements OAuth2Grant, DisposableBean {
 
         final HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        if (headersEnhancer != null) {
-            headersEnhancer.enhance(httpHeaders);
+        if (authorizationHeadersEnhancer != null) {
+            authorizationHeadersEnhancer.enhance(httpHeaders);
         }
 
         final RequestEntity<MultiValueMap<String, String>> requestEntity = new RequestEntity<>(body, httpHeaders, HttpMethod.POST, tokenUri);
@@ -105,12 +113,22 @@ public class ClientCredentialsGrant implements OAuth2Grant, DisposableBean {
     }
 
     @Override
-    public HeadersEnhancer getHeadersEnhancer() {
-        return headersEnhancer;
+    public HeadersEnhancer getAuthorizationHeadersEnhancer() {
+        return authorizationHeadersEnhancer;
     }
 
     @Override
-    public void setHeadersEnhancer(final HeadersEnhancer headersEnhancer) {
-        this.headersEnhancer = headersEnhancer;
+    public void setAuthorizationHeadersEnhancer(final HeadersEnhancer authorizationHeadersEnhancer) {
+        this.authorizationHeadersEnhancer = authorizationHeadersEnhancer;
+    }
+
+    @Override
+    public HeadersEnhancer getRequestHeadersEnhancer() {
+        return requestHeadersEnhancer;
+    }
+
+    @Override
+    public void setRequestHeadersEnhancer(final HeadersEnhancer requestHeadersEnhancer) {
+        this.requestHeadersEnhancer = requestHeadersEnhancer;
     }
 }

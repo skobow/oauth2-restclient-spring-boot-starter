@@ -32,6 +32,8 @@ import java.net.URI;
 
 public interface OAuth2Grant {
     RequestEntity getRequest(final URI uri, final HttpMethod httpMethod);
-    HeadersEnhancer getHeadersEnhancer();
-    void setHeadersEnhancer(HeadersEnhancer headersEnhancer);
+    HeadersEnhancer getAuthorizationHeadersEnhancer();
+    HeadersEnhancer getRequestHeadersEnhancer();
+    void setRequestHeadersEnhancer(HeadersEnhancer requestHeadersEnhancer);
+    void setAuthorizationHeadersEnhancer(HeadersEnhancer authorizationHeadersEnhancer);
 }
