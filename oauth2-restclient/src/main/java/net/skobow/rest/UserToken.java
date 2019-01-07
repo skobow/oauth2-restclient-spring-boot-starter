@@ -53,7 +53,7 @@ public class UserToken {
     }
 
     public boolean isExpired() {
-        return LocalDateTime.now().isAfter(tokenExpiryDate);
+        return tokenExpiryDate != null && LocalDateTime.now().isAfter(tokenExpiryDate);
     }
 
     public String getTokenType() {

@@ -38,7 +38,7 @@ ext {
 
 allprojects {
     group 'net.skobow'
-    version '0.2.0'
+    version '0.2.1'
 
     publishing {
         repositories {
@@ -158,6 +158,8 @@ def customizePom(pom) {
             developers {
                 developer {
                     name 'skobow'
+                    email 'sk@skobow.net'
+                    url 'https://github.com/skobow'
                 }
             }
         }

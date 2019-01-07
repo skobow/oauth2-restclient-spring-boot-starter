@@ -9,13 +9,13 @@ Simply add it as a dependency to your Spring project and get `OAuth2RestClient` 
 
 
 ### Gradle
-    implementation 'net.skobow:oauth2-restclient-spring-boot-starter:0.2.0'
+    implementation 'net.skobow:oauth2-restclient-spring-boot-starter:0.2.1'
     
 ### Maven
     <dependency>
       <groupId>net.skobow</groupId>
       <artifactId>oauth2-restclient-spring-boot-starter</artifactId>
-      <version>0.2.0</version>
+      <version>0.2.1</version>
       <type>pom</type>
     </dependency>
 
