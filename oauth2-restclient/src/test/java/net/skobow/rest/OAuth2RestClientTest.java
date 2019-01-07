@@ -45,14 +45,14 @@ import static org.springframework.test.web.client.response.MockRestResponseCreat
 
 public class OAuth2RestClientTest {
 
-    public static final String ACCESS_TOKEN = "token";
-    public static final String REFRESH_TOKEN = "refreshToken";
-    public static final String TOKEN_TYPE = "bearer";
-    public static final String CLIENT_ID = "client";
-    public static final String CLIENT_SECRET = "secret";
-    public static final String SCOPE = "scope";
-    public static final String HTTP_LOCALHOST_TOKEN = "http://localhost/token";
-    public static final String HTTP_LOCALHOST = "http://localhost/";
+    private static final String ACCESS_TOKEN = "token";
+    private static final String REFRESH_TOKEN = "refreshToken";
+    private static final String TOKEN_TYPE = "bearer";
+    private static final String CLIENT_ID = "client";
+    private static final String CLIENT_SECRET = "secret";
+    private static final String SCOPE = "scope";
+    private static final String HTTP_LOCALHOST_TOKEN = "http://localhost/token";
+    private static final String HTTP_LOCALHOST = "http://localhost/";
     private OAuth2RestClient client;
     private MockRestServiceServer mockRestServiceServer;
 

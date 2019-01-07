@@ -49,8 +49,8 @@ public class OAuth2RestClientAutoConfiguration {
 
     @Bean
     @ConditionalOnMissingBean
-    public OAuth2RestClient oAuth2RestClient(final OAuth2Grant oAuth2Grant, final RestTemplate restTemplate) {
-        return new OAuth2RestClient(new RestTemplate(), oAuth2Grant);
+    public OAuth2RestClient oAuth2RestClient(final OAuth2Grant oAuth2Grant, final RestTemplate oAuth2RestTemplate) {
+        return new OAuth2RestClient(oAuth2RestTemplate, oAuth2Grant);
     }
 
     @Bean
@@ -73,8 +73,8 @@ public class OAuth2RestClientAutoConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(name = "oauth2RestTemplate")
-    public RestTemplate oauth2RestTemplate() throws NoSuchAlgorithmException, KeyManagementException {
+    @ConditionalOnMissingBean(name = "oAuth2RestTemplate")
+    public RestTemplate oAuth2RestTemplate() throws NoSuchAlgorithmException, KeyManagementException {
         // Enforce TLSv1.2 over TLSv1.3 due to Bug JDK-8211806 in JDK 11.0.1
         // see https://bugs.openjdk.java.net/browse/JDK-8211806 for more information
         final SSLContext context = SSLContext.getInstance("TLSv1.2");
