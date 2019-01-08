@@ -26,6 +26,7 @@ package net.skobow.rest;
 
 
 import net.skobow.rest.oauth2.OAuth2Grant;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
@@ -43,21 +44,37 @@ public class OAuth2RestClient {
         this.oAuth2Grant = oAuth2Grant;
     }
 
+    public <T> ResponseEntity<T> get(final String uri, final HttpHeaders headers, final Class<T> responseType) {
+        return get(URI.create(uri), headers, responseType);
+    }
+
     public <T> ResponseEntity<T> get(final String uri, final Class<T> responseType) {
         return get(URI.create(uri), responseType);
     }
 
     public <T> ResponseEntity<T> get(final URI uri, final Class<T> responseType) {
-        final RequestEntity request = oAuth2Grant.getRequest(uri, HttpMethod.GET);
+        return get(uri, null, responseType);
+    }
+
+    public <T> ResponseEntity<T> get(final URI uri, final HttpHeaders httpHeaders, final Class<T> responseType) {
+        final RequestEntity request = oAuth2Grant.getRequest(uri, httpHeaders, HttpMethod.GET);
         return exchange(request, responseType);
     }
 
     public <T,K> ResponseEntity<T> post(final String uri, final Class<T> responseType, final K body, final Class<K> bodyType) {
-        return post(URI.create(uri), responseType, body, bodyType);
+        return post(uri, null, responseType, body, bodyType);
+    }
+
+    public <T,K> ResponseEntity<T> post(final String uri, final HttpHeaders httpHeaders, final Class<T> responseType, final K body, final Class<K> bodyType) {
+        return post(URI.create(uri), httpHeaders, responseType, body, bodyType);
     }
 
     public <T,K> ResponseEntity<T> post(final URI uri, final Class<T> responseType, final K body, final Class<K> bodyType) {
-        final RequestEntity<K> request = oAuth2Grant.getRequest(uri, HttpMethod.POST, body, bodyType);
+        return post(uri, null, responseType, body, bodyType);
+    }
+
+    public <T,K> ResponseEntity<T> post(final URI uri, final HttpHeaders httpHeaders, final Class<T> responseType, final K body, final Class<K> bodyType) {
+        final RequestEntity<K> request = oAuth2Grant.getRequest(uri, httpHeaders, HttpMethod.POST, body, bodyType);
         return exchange(request, responseType);
     }
 
