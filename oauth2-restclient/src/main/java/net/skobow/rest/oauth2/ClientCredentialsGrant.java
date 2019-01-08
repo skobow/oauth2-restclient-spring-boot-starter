@@ -71,30 +71,33 @@ public class ClientCredentialsGrant implements OAuth2Grant, DisposableBean {
     }
 
     @Override
-    public RequestEntity getRequest(final URI uri, final HttpMethod httpMethod) {
-        return new RequestEntity(getHeaders(), httpMethod, uri);
+    public RequestEntity getRequest(final URI uri, final HttpHeaders httpHeaders, final HttpMethod httpMethod) {
+        return new RequestEntity(getHeaders(httpHeaders), httpMethod, uri);
     }
 
     @Override
-    public <T> RequestEntity<T> getRequest(final URI uri, final HttpMethod httpMethod, final T body, final Class<T> type) {
-        return new RequestEntity<>(body, getHeaders(), httpMethod, uri, type);
+    public <T> RequestEntity<T> getRequest(final URI uri, final HttpHeaders httpHeaders, final HttpMethod httpMethod, final T body, final Class<T> type) {
+        return new RequestEntity<>(body, getHeaders(httpHeaders), httpMethod, uri, type);
     }
 
-    private HttpHeaders getHeaders() {
+    private HttpHeaders getHeaders(final HttpHeaders httpHeaders) {
         UserToken userToken = userTokenService.getUserToken(clientId);
         if (userToken == null || userToken.isExpired()) {
             userToken = getAccessToken();
             userTokenService.setUserToken(clientId, userToken);
         }
 
-        final HttpHeaders httpHeaders = new HttpHeaders();
-        httpHeaders.setBearerAuth(userToken.getAccessToken());
+        final HttpHeaders headers = httpHeaders != null
+                ? httpHeaders
+                : new HttpHeaders();
+
+        headers.setBearerAuth(userToken.getAccessToken());
 
         if (requestHeadersEnhancer != null) {
-            requestHeadersEnhancer.enhance(httpHeaders);
+            requestHeadersEnhancer.enhance(headers);
         }
 
-        return httpHeaders;
+        return headers;
     }
 
     private UserToken getAccessToken() {

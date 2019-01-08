@@ -53,6 +53,9 @@ public class OAuth2RestClientTest {
     private static final String SCOPE = "scope";
     private static final String HTTP_LOCALHOST_TOKEN = "http://localhost/token";
     private static final String HTTP_LOCALHOST = "http://localhost/";
+    private static final String X_CUSTOM_HEADER = "X-Custom-Header";
+    private static final String CUSTOM_HEADER_VALUE = "CUSTOM_HEADER_VALUE";
+    public static final String BEARER = "Bearer ";
     private OAuth2RestClient client;
     private MockRestServiceServer mockRestServiceServer;
 
@@ -60,11 +63,6 @@ public class OAuth2RestClientTest {
     public void setUp() {
         final RestTemplate restTemplate = new RestTemplate();
         mockRestServiceServer = MockRestServiceServer.bindTo(restTemplate).build();
-        mockRestServiceServer
-                .expect(requestTo(HTTP_LOCALHOST_TOKEN))
-                .andExpect(content().string(String.format("grant_type=client_credentials&client_id=%s&client_secret=%s&scope=%s", CLIENT_ID, CLIENT_SECRET, SCOPE)))
-                .andRespond(withSuccess());
-
         final ClientCredentialsGrant grant = new ClientCredentialsGrant(
                 CLIENT_ID,
                 CLIENT_SECRET.toCharArray(),
@@ -80,10 +78,11 @@ public class OAuth2RestClientTest {
     @Test
     @SuppressWarnings("squid:S00100")
     public void get_should_request_token_and_set_authorization_header() {
+        expectClientCredentialsTokenCall();
         mockRestServiceServer
                 .expect(requestTo(HTTP_LOCALHOST))
                 .andExpect(method(HttpMethod.GET))
-                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer " + ACCESS_TOKEN))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, BEARER + ACCESS_TOKEN))
                 .andRespond(withSuccess());
 
         final ResponseEntity<Object> responseEntity = client.get(HTTP_LOCALHOST, Object.class);
@@ -92,14 +91,76 @@ public class OAuth2RestClientTest {
 
     @Test
     @SuppressWarnings("squid:S00100")
+    public void custom_headers_should_be_preserved_with_get() {
+        expectClientCredentialsTokenCall();
+        mockRestServiceServer
+                .expect(requestTo(HTTP_LOCALHOST))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, BEARER + ACCESS_TOKEN))
+                .andExpect(header(X_CUSTOM_HEADER, CUSTOM_HEADER_VALUE))
+                .andRespond(withSuccess());
+
+        final HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(X_CUSTOM_HEADER, CUSTOM_HEADER_VALUE);
+
+        final ResponseEntity<Object> responseEntity = client.get(HTTP_LOCALHOST, httpHeaders, Object.class);
+        assertThat(responseEntity).isNotNull();
+    }
+
+    @Test
+    @SuppressWarnings("squid:S00100")
+    public void request_headers_should_be_enhanced_with_HeadersEnhancer() {
+        expectClientCredentialsTokenCall();
+        mockRestServiceServer
+                .expect(requestTo(HTTP_LOCALHOST))
+                .andExpect(method(HttpMethod.GET))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, BEARER + ACCESS_TOKEN))
+                .andExpect(header(X_CUSTOM_HEADER, CUSTOM_HEADER_VALUE))
+                .andRespond(withSuccess());
+
+        client.getOAuth2Grant().setRequestHeadersEnhancer(httpHeaders -> httpHeaders.add(X_CUSTOM_HEADER, CUSTOM_HEADER_VALUE));
+        final ResponseEntity<Object> responseEntity = client.get(HTTP_LOCALHOST, Object.class);
+        assertThat(responseEntity).isNotNull();
+    }
+
+    @Test
+    @SuppressWarnings("squid:S00100")
     public void post_should_request_token_and_set_authorization_header() {
+        expectClientCredentialsTokenCall();
         mockRestServiceServer
                 .expect(requestTo(HTTP_LOCALHOST))
                 .andExpect(method(HttpMethod.POST))
-                .andExpect(header(HttpHeaders.AUTHORIZATION, "Bearer " + ACCESS_TOKEN))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, BEARER + ACCESS_TOKEN))
                 .andRespond(withSuccess());
 
         final ResponseEntity<Object> responseEntity = client.post(HTTP_LOCALHOST, Object.class, null, Object.class);
         assertThat(responseEntity).isNotNull();
+    }
+
+    @Test
+    @SuppressWarnings("squid:S00100")
+    public void custom_headers_should_be_preserved_with_post() {
+        expectClientCredentialsTokenCall();
+        mockRestServiceServer
+                .expect(requestTo(HTTP_LOCALHOST))
+                .andExpect(method(HttpMethod.POST))
+                .andExpect(header(HttpHeaders.AUTHORIZATION, BEARER + ACCESS_TOKEN))
+                .andExpect(header(X_CUSTOM_HEADER, CUSTOM_HEADER_VALUE))
+                .andRespond(withSuccess());
+
+        final HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(X_CUSTOM_HEADER, CUSTOM_HEADER_VALUE);
+
+        final ResponseEntity<Object> responseEntity = client.post(HTTP_LOCALHOST, httpHeaders, Object.class, null, Object.class);
+        assertThat(responseEntity).isNotNull();
+    }
+
+    private void expectClientCredentialsTokenCall() {
+        client.getOAuth2Grant().setAuthorizationHeadersEnhancer(httpHeaders -> httpHeaders.add(X_CUSTOM_HEADER, CUSTOM_HEADER_VALUE));
+        mockRestServiceServer
+                .expect(requestTo(HTTP_LOCALHOST_TOKEN))
+                .andExpect(content().string(String.format("grant_type=client_credentials&client_id=%s&client_secret=%s&scope=%s", CLIENT_ID, CLIENT_SECRET, SCOPE)))
+                .andExpect(header(X_CUSTOM_HEADER, CUSTOM_HEADER_VALUE))
+                .andRespond(withSuccess());
     }
 }

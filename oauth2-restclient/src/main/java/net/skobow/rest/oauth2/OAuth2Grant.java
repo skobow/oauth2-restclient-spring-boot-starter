@@ -25,14 +25,15 @@
 package net.skobow.rest.oauth2;
 
 import net.skobow.rest.HeadersEnhancer;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.RequestEntity;
 
 import java.net.URI;
 
 public interface OAuth2Grant {
-    RequestEntity getRequest(final URI uri, final HttpMethod httpMethod);
-    <T> RequestEntity<T> getRequest(URI uri, HttpMethod httpMethod, T body, Class<T> type);
+    RequestEntity getRequest(URI uri, HttpHeaders httpHeaders, HttpMethod httpMethod);
+    <T> RequestEntity<T> getRequest(URI uri, HttpHeaders httpHeaders, HttpMethod httpMethod, T body, Class<T> type);
     HeadersEnhancer getAuthorizationHeadersEnhancer();
     HeadersEnhancer getRequestHeadersEnhancer();
     void setRequestHeadersEnhancer(HeadersEnhancer requestHeadersEnhancer);

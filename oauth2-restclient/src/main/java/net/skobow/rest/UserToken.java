@@ -33,7 +33,11 @@ public class UserToken {
     private final LocalDateTime tokenExpiryDate;
     private final String tokenType;
 
-    public UserToken(final String accessToken, final String refreshToken, final String tokenType, final LocalDateTime tokenExpiryDate) {
+    public UserToken(
+            final String accessToken,
+            final String refreshToken,
+            final String tokenType,
+            final LocalDateTime tokenExpiryDate) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
         this.tokenType = tokenType;

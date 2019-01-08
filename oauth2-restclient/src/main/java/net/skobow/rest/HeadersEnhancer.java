@@ -26,7 +26,7 @@ package net.skobow.rest;
 
 import org.springframework.http.HttpHeaders;
 
+@FunctionalInterface
 public interface HeadersEnhancer {
-    default void enhance(HttpHeaders httpHeaders) {
-    }
+    void enhance(HttpHeaders httpHeaders);
 }
