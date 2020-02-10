@@ -1,7 +1,7 @@
 /*
  * MIT License
  *
- * Copyright (c) 2019 Sven Kobow
+ * Copyright (c) 2020 Sven Kobow
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -26,19 +26,19 @@ plugins {
     id 'java'
     id 'maven-publish'
     id 'signing'
-    id 'io.spring.dependency-management' version '1.0.6.RELEASE'
-    id 'com.github.ben-manes.versions' version '0.20.0'
+    id 'io.spring.dependency-management' version '1.0.9.RELEASE'
+    id 'com.github.ben-manes.versions' version '0.27.0'
 }
 
 ext {
-    springBootVersion = '2.1.1.RELEASE'
-    springVersion = '5.1.3.RELEASE'
-    junitVersion = '4.12'
+    springBootVersion = '2.2.4.RELEASE'
+    springVersion = '5.2.3.RELEASE'
+    junitVersion = '4.13'
 }
 
 allprojects {
     group 'net.skobow'
-    version '0.3.0-SNAPSHOT'
+    version '0.4.0-SNAPSHOT'
 
     publishing {
         repositories {
@@ -116,7 +116,10 @@ publishing {
 }
 
 signing {
-    sign publishing.publications.starter
+    required { false }
+    if( required ) {
+        sign publishing.publications.starter
+    }
 }
 
 def customizePom(pom) {

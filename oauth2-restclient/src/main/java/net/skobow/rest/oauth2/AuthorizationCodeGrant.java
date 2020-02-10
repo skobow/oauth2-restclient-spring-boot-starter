@@ -22,41 +22,44 @@
  * SOFTWARE.
  */
 
-plugins {
-    id 'java'
-}
+package net.skobow.rest.oauth2;
 
-dependencies {
-    compile("org.springframework:spring-context:${rootProject.springVersion}")
-    compile("org.springframework:spring-web:${rootProject.springVersion}")
+import net.skobow.rest.HeadersEnhancer;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.RequestEntity;
 
-    testImplementation('org.assertj:assertj-core:3.15.0')
-}
+import java.net.URI;
 
-publishing {
-    publications {
-        library(MavenPublication) {
-            customizePom(pom)
-            groupId = "${groupId}"
-            artifactId = 'oauth2-restclient'
-            version = "${version}"
+public class AuthorizationCodeGrant implements OAuth2Grant {
 
-            artifact(sourcesJar) {
-                classifier = 'sources'
-            }
-
-            artifact(javadocJar) {
-                classifier = 'javadoc'
-            }
-
-            from components.java
-        }
+    @Override
+    public RequestEntity getRequest(final URI uri, final HttpHeaders httpHeaders, final HttpMethod httpMethod) {
+        return null;
     }
-}
 
-signing {
-    required { false }
-    if( required ) {
-        sign publishing.publications.library
+    @Override
+    public <T> RequestEntity<T> getRequest(final URI uri, final HttpHeaders httpHeaders, final HttpMethod httpMethod, final T body, final Class<T> type) {
+        return null;
+    }
+
+    @Override
+    public HeadersEnhancer getAuthorizationHeadersEnhancer() {
+        return null;
+    }
+
+    @Override
+    public HeadersEnhancer getRequestHeadersEnhancer() {
+        return null;
+    }
+
+    @Override
+    public void setRequestHeadersEnhancer(final HeadersEnhancer requestHeadersEnhancer) {
+
+    }
+
+    @Override
+    public void setAuthorizationHeadersEnhancer(final HeadersEnhancer authorizationHeadersEnhancer) {
+
     }
 }
